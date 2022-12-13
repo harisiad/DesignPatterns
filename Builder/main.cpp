@@ -1,22 +1,22 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 
 class BuildingPlan
 {
     friend class BuildingPlanBuilder;
-    std::vector<BuildingPlan> plans_;
     std::string planName_;
     float progress_ = 0.0f;
     float requiredDays_ = 0.0f;
 
-    BuildingPlan() {}
-    BuildingPlan(const std::string& planName, const float& requiredDays) : planName_(planName), requiredDays_(requiredDays) { }
+    BuildingPlan() = default;
+    BuildingPlan(std::string planName, const float& requiredDays) : planName_(std::move(planName)), requiredDays_(requiredDays) { }
 public:
     void constructBuilding()
     {
         std::cout << "Starting construction\n";
 
-        for (int i = 0; i < requiredDays_; i++) {
+        for (int i = 0; i < (int)requiredDays_; i++) {
             /** complex process that would require building construction */
             progress_ += 100.0f / requiredDays_;
             if (progress_ < 100.0f) {
@@ -30,19 +30,13 @@ public:
 
 class BuildingPlanBuilder
 {
-    BuildingPlan plan_;
+    std::vector<BuildingPlan> plans_;
 public:
-    BuildingPlanBuilder() {}
+    BuildingPlanBuilder() = default;
 
-    BuildingPlanBuilder(std::string planName, float requiredDays)
+    BuildingPlanBuilder addMoreBuildingPlans(const std::string& planName, float requiredDays)
     {
-        plan_ = {planName, requiredDays};
-    }
-
-    BuildingPlanBuilder addMoreBuildingPlans(std::string planName, float requiredDays)
-    {
-        BuildingPlan plan {planName, requiredDays};
-        plan_.plans_.push_back(plan);
+        plans_.push_back({planName, requiredDays});
 
         return *this;
     }
@@ -54,7 +48,7 @@ public:
 
     BuildingPlanBuilder build()
     {
-        for (auto plan : plan_.plans_) {
+        for (auto plan : plans_) {
             plan.constructBuilding();
         }
 
